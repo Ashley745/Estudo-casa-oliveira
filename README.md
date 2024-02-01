@@ -53,4 +53,206 @@ sua empresa. Vamos ajudá-lo. Iremos começar construindo o banco de dados.
 
 
 ### Modelo Lógico
+
+
 !["modelo lógico de banco de dados"](modelo-casa-oliveira.png)
+
+### Código SQL para modelo físico de bano de dados
+
+```sql
+    -- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `mydb` ;
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+SHOW WARNINGS;
+USE `mydb` ;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Usuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Usuario` (
+  `idusuario` INT NOT NULL AUTO_INCREMENT,
+  `login` VARCHAR(10) NOT NULL,
+  `senha` VARCHAR(200) NOT NULL,
+  `cargo` VARCHAR(20) NOT NULL,
+  `criadoem` DATETIME NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`idusuario`),
+  UNIQUE INDEX `login_UNIQUE` (`login` ASC) VISIBLE)
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Funcionario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Funcionario` (
+  `idfuncionario` INT NOT NULL AUTO_INCREMENT,
+  `nomefuncionario` VARCHAR(50) NOT NULL,
+  `telefonefuncionario` VARCHAR(15) NOT NULL,
+  `cpffuncionario` VARCHAR(15) NOT NULL,
+  `emailfuncionario` VARCHAR(100) NOT NULL,
+  `cargofuncionario` VARCHAR(30) NOT NULL,
+  `expediente` VARCHAR(50) NOT NULL,
+  `datanascimentofuncionario` DATE NOT NULL,
+  `idusuario` INT NOT NULL,
+  PRIMARY KEY (`idfuncionario`, `idusuario`),
+  UNIQUE INDEX `cpffuncionario_UNIQUE` (`cpffuncionario` ASC) VISIBLE,
+  UNIQUE INDEX `emailfuncionario_UNIQUE` (`emailfuncionario` ASC) VISIBLE,
+  INDEX `fk_Funcionario_Usuario_idx` (`idusuario` ASC) VISIBLE,
+  CONSTRAINT `fk_Funcionario_Usuario`
+    FOREIGN KEY (`idusuario`)
+    REFERENCES `mydb`.`Usuario` (`idusuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Cliente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Cliente` (
+  `idcliente` INT NOT NULL AUTO_INCREMENT,
+  `nomecliente` VARCHAR(50) NOT NULL,
+  `cpfclient` VARCHAR(15) NOT NULL,
+  `telefonecliente` VARCHAR(15) NOT NULL,
+  `emailcliente` VARCHAR(100) NOT NULL,
+  `datanascimentocliente` DATE NOT NULL,
+  PRIMARY KEY (`idcliente`),
+  UNIQUE INDEX `cpfclient_UNIQUE` (`cpfclient` ASC) VISIBLE,
+  UNIQUE INDEX `emailcliente_UNIQUE` (`emailcliente` ASC) VISIBLE)
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Produto`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Produto` (
+  `idproduto` INT NOT NULL AUTO_INCREMENT,
+  `nomeproduto` VARCHAR(50) NOT NULL,
+  `categoria` VARCHAR(30) NOT NULL,
+  `descricao` TEXT NOT NULL,
+  `datavalidade` DATE NOT NULL,
+  `precounitario` DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (`idproduto`))
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Venda`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Venda` (
+  `idvenda` INT NOT NULL,
+  `valor` DECIMAL(10,2) NOT NULL,
+  `formadepagamento` VARCHAR(30) NOT NULL,
+  `troco` DECIMAL(8,2) NOT NULL,
+  `datahoravenda` DATETIME NOT NULL,
+  `idcliente` INT NOT NULL,
+  `idusuario` INT NOT NULL,
+  PRIMARY KEY (`idvenda`, `idcliente`, `idusuario`),
+  INDEX `fk_Venda_Cliente1_idx` (`idcliente` ASC) VISIBLE,
+  INDEX `fk_Venda_Usuario1_idx` (`idusuario` ASC) VISIBLE,
+  CONSTRAINT `fk_Venda_Cliente1`
+    FOREIGN KEY (`idcliente`)
+    REFERENCES `mydb`.`Cliente` (`idcliente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Venda_Usuario1`
+    FOREIGN KEY (`idusuario`)
+    REFERENCES `mydb`.`Usuario` (`idusuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`ItensVenda`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`ItensVenda` (
+  `iditensvenda` INT NOT NULL,
+  `precoproduto` DECIMAL(10,2) NOT NULL,
+  `quantidadeitens` INT NOT NULL,
+  `subtotal` DECIMAL(10,2) NOT NULL,
+  `idproduto` INT NOT NULL,
+  `idvenda` INT NOT NULL,
+  PRIMARY KEY (`iditensvenda`, `idproduto`, `idvenda`),
+  INDEX `fk_ItensVenda_Produto1_idx` (`idproduto` ASC) VISIBLE,
+  INDEX `fk_ItensVenda_Venda1_idx` (`idvenda` ASC) VISIBLE,
+  CONSTRAINT `fk_ItensVenda_Produto1`
+    FOREIGN KEY (`idproduto`)
+    REFERENCES `mydb`.`Produto` (`idproduto`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ItensVenda_Venda1`
+    FOREIGN KEY (`idvenda`)
+    REFERENCES `mydb`.`Venda` (`idvenda`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Estoque`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Estoque` (
+  `iestoque` INT NOT NULL AUTO_INCREMENT,
+  `quantidadeatual` INT NOT NULL,
+  `quantidademaxima` INT NOT NULL,
+  `quantidademinima` INT NOT NULL,
+  `ultimaatualizacao` DATETIME NOT NULL,
+  `observcao` TEXT NOT NULL,
+  `idproduto` INT NOT NULL,
+  PRIMARY KEY (`iestoque`, `idproduto`),
+  INDEX `fk_Estoque_Produto1_idx` (`idproduto` ASC) VISIBLE,
+  CONSTRAINT `fk_Estoque_Produto1`
+    FOREIGN KEY (`idproduto`)
+    REFERENCES `mydb`.`Produto` (`idproduto`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Pagamento`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Pagamento` (
+  `idpagamento` INT NOT NULL AUTO_INCREMENT,
+  `formapagamento` VARCHAR(30) NOT NULL,
+  `desconto` DECIMAL(6,3) NOT NULL,
+  `situacaopagamento` VARCHAR(20) NOT NULL,
+  `parcelas` INT NOT NULL,
+  `valorparcelas` DECIMAL(10,2) NOT NULL,
+  `observacao` TEXT NOT NULL,
+  `idvenda` INT NOT NULL,
+  PRIMARY KEY (`idpagamento`, `idvenda`),
+  INDEX `fk_Pagamento_Venda1_idx` (`idvenda` ASC) VISIBLE,
+  CONSTRAINT `fk_Pagamento_Venda1`
+    FOREIGN KEY (`idvenda`)
+    REFERENCES `mydb`.`Venda` (`idvenda`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+```
