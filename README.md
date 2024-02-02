@@ -52,12 +52,19 @@ sua empresa. Vamos ajudá-lo. Iremos começar construindo o banco de dados.
  !["modelo conceitual de banco de dados"](modelo-cocentual-casa-oliveira.png)
 
 
+### Normalização feita no Excel.
+### Foram realizadas 3 normalizações
+
+!["Primeira parte"](normalizacao-execel1.png)
+!["Segunda parte"](normalizacao-execel2.png)
+
+
 ### Modelo Lógico
 
 
 !["modelo lógico de banco de dados"](modelo-casa-oliveira.png)
 
-### Código SQL para modelo físico de bano de dados
+### Código SQL para modelo físico de banco de dados
 
 ```sql
     -- MySQL Workbench Forward Engineering
